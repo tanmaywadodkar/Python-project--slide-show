@@ -7,13 +7,11 @@ root.title("Image Sideshow Viewer")
 
 # list of image paths
 image_paths = [
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-17 at 11.45.32 AM.jpeg",
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-17 at 11.45.11 AM.jpeg",
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-13 at 12.40.58 PM.jpeg",
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-17 at 11.44.31 AM.jpeg",
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-17 at 12.11.02 PM.jpeg",
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-17 at 12.11.03 PM.jpeg",
-    r"C:\Users\tanma\Downloads\WhatsApp Image 2026-05-17 at 12.11.02 PM (1).jpeg"
+    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131263/WhatsApp_Image_2026-05-17_at_12.11.03_PM_voa2pd.jpg",
+    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131262/WhatsApp_Image_2026-05-17_at_12.11.02_PM_1_ampyey.jpg",
+    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131262/WhatsApp_Image_2026-05-17_at_11.45.32_AM_aa7b9e.jpg",
+    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131261/WhatsApp_Image_2026-05-17_at_11.45.11_AM_qaqvtk.jpg"
+    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131260/WhatsApp_Image_2026-05-13_at_12.40.58_PM_syu6l6.jpg"
 ]
 
 # resize the images to 1080x1080
