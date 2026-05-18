@@ -1,61 +1,215 @@
 from itertools import cycle
-from itertools import cycle
 from PIL import Image, ImageTk
 import tkinter as tk
 import requests
 from io import BytesIO
 
-# list of image paths (fixed missing comma)
+# ----------------------------- #
+# IMAGE URLS
+# ----------------------------- #
+
 image_paths = [
-    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131263/WhatsApp_Image_2026-05-17_at_12.11.03_PM_voa2pd.jpg",
-    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131262/WhatsApp_Image_2026-05-17_at_12.11.02_PM_1_ampyey.jpg",
-    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131262/WhatsApp_Image_2026-05-17_at_11.45.32_AM_aa7b9e.jpg",
-    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131261/WhatsApp_Image_2026-05-17_at_11.45.11_AM_qaqvtk.jpg",
-    r"https://res.cloudinary.com/dliruejpu/image/upload/v1779131260/WhatsApp_Image_2026-05-13_at_12.40.58_PM_syu6l6.jpg"
+    "https://res.cloudinary.com/dliruejpu/image/upload/v1779135975/pexels-sevde-sen-48864333-16767121_roeyt8.jpg",
+    "https://res.cloudinary.com/dliruejpu/image/upload/v1779135972/pexels-osviel91-32162196_gy5moc.jpg",
+    "https://res.cloudinary.com/dliruejpu/image/upload/v1779135922/pexels-juan-diavanera-2150627805-32211894_e79s24.jpg",
+    "https://res.cloudinary.com/dliruejpu/image/upload/v1779135908/pexels-sb42-4022697_bkzyy9.jpg",
+    "https://res.cloudinary.com/dliruejpu/image/upload/v1779135885/pexels-musstashy-35445399_t5ivfq.jpg",
+    "https://res.cloudinary.com/dliruejpu/image/upload/v1779135982/pexels-pit0chka-9854061_s5kcje.jpg"
 ]
 
-# resize the images to 1080x1080
-image_size = (1080, 1080)
+# ----------------------------- #
+# SETTINGS
+# ----------------------------- #
 
-def load_image(path, size=image_size, timeout=15):
-    if str(path).lower().startswith("http"):
-        resp = requests.get(path, timeout=timeout)
-        resp.raise_for_status()
-        img = Image.open(BytesIO(resp.content))
+WINDOW_WIDTH = 1000
+WINDOW_HEIGHT = 700
+
+IMAGE_SIZE = (1000, 600)
+
+SLIDESHOW_DELAY = 2500
+FADE_STEPS = 12
+FADE_DELAY = 50
+
+# ----------------------------- #
+# LOAD IMAGE FUNCTION
+# ----------------------------- #
+
+def load_image(path, size=IMAGE_SIZE, timeout=15):
+    """
+    Loads image from URL or local path
+    and resizes it.
+    """
+
+    if path.lower().startswith("http"):
+        response = requests.get(path, timeout=timeout)
+        response.raise_for_status()
+        img = Image.open(BytesIO(response.content))
     else:
         img = Image.open(path)
+
     return img.resize(size)
 
+
+# ----------------------------- #
+# MAIN GUI FUNCTION
+# ----------------------------- #
+
 def build_gui():
+
     root = tk.Tk()
-    root.title("Image Sideshow Viewer")
 
-    # load PIL Images (may take a moment for remote downloads)
-    pil_images = [load_image(p) for p in image_paths]
+    root.title("✨ Premium Image Slideshow Viewer")
+    root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
+    root.configure(bg="#0f172a")
 
-    # convert to PhotoImage after root exists
-    photo_images = [ImageTk.PhotoImage(image) for image in pil_images]
+    # ----------------------------- #
+    # TITLE
+    # ----------------------------- #
 
-    label = tk.Label(root)
+    title = tk.Label(
+        root,
+        text="✨ IMAGE SLIDESHOW APP ✨",
+        font=("Poppins", 24, "bold"),
+        bg="#0f172a",
+        fg="white"
+    )
+
+    title.pack(pady=15)
+
+    # ----------------------------- #
+    # IMAGE FRAME
+    # ----------------------------- #
+
+    image_frame = tk.Frame(
+        root,
+        bg="#1e293b",
+        bd=5,
+        relief="ridge"
+    )
+
+    image_frame.pack(pady=10)
+
+    # ----------------------------- #
+    # LOAD IMAGES
+    # ----------------------------- #
+
+    pil_images = [load_image(path) for path in image_paths]
+
+    label = tk.Label(
+        image_frame,
+        bg="#1e293b"
+    )
+
     label.pack()
 
-    image_cycle = cycle(photo_images)
+    image_cycle = cycle(pil_images)
 
-    def update_image():
-        next_image = next(image_cycle)
-        label.config(image=next_image)
-        label.image = next_image
-        root.after(1500, update_image)
+    current_image = [next(image_cycle)]
+
+    # Display first image
+    first_photo = ImageTk.PhotoImage(current_image[0])
+    label.config(image=first_photo)
+    label.image = first_photo
+
+    # ----------------------------- #
+    # FADE TRANSITION FUNCTION
+    # ----------------------------- #
+
+    def fade_to_next():
+
+        next_pil_image = next(image_cycle)
+
+        for alpha in range(0, FADE_STEPS + 1):
+
+            blended = Image.blend(
+                current_image[0],
+                next_pil_image,
+                alpha / FADE_STEPS
+            )
+
+            photo = ImageTk.PhotoImage(blended)
+
+            label.config(image=photo)
+            label.image = photo
+
+            root.update()
+            root.after(FADE_DELAY)
+
+        current_image[0] = next_pil_image
+
+        root.after(SLIDESHOW_DELAY, fade_to_next)
+
+    # ----------------------------- #
+    # START BUTTON
+    # ----------------------------- #
 
     def start_slideshow():
-        update_image()
-        play_button.config(state=tk.DISABLED)
 
-    play_button = tk.Button(root, text="Start Slideshow", command=start_slideshow)
-    play_button.pack()
+        start_button.config(
+            text="Slideshow Running...",
+            bg="#16a34a",
+            fg="white",
+            state=tk.DISABLED
+        )
+
+        fade_to_next()
+
+    # Hover Effects
+    def on_enter(e):
+        start_button.config(
+            bg="#38bdf8",
+            fg="black"
+        )
+
+    def on_leave(e):
+        start_button.config(
+            bg="#2563eb",
+            fg="white"
+        )
+
+    start_button = tk.Button(
+        root,
+        text="▶ Start Slideshow",
+        font=("Poppins", 16, "bold"),
+        bg="#2563eb",
+        fg="white",
+        activebackground="#38bdf8",
+        activeforeground="black",
+        padx=25,
+        pady=12,
+        bd=0,
+        relief="flat",
+        cursor="hand2",
+        command=start_slideshow
+    )
+
+    start_button.pack(pady=25)
+
+    start_button.bind("<Enter>", on_enter)
+    start_button.bind("<Leave>", on_leave)
+
+    # ----------------------------- #
+    # FOOTER
+    # ----------------------------- #
+
+    footer = tk.Label(
+        root,
+        text="Developed using Python, Tkinter & Pillow",
+        font=("Arial", 10),
+        bg="#0f172a",
+        fg="#94a3b8"
+    )
+
+    footer.pack(side="bottom", pady=10)
 
     return root
 
-if __name__ == '__main__':
+
+# ----------------------------- #
+# MAIN PROGRAM
+# ----------------------------- #
+
+if __name__ == "__main__":
+
     app = build_gui()
     app.mainloop()
